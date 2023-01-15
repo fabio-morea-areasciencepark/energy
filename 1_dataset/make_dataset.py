@@ -79,20 +79,18 @@ data_to_plot = data[10000:11000]
 
 data['winter'] = "-"
 anni = [2018,2019,2020,2021,2022,2023]
-stagioni = ["inv1819" ,"inv1920" ,"inv2021" ,"inv2122", "inv2223","inv2324"]
+winters = ["do_not_use","winter1" ,"winter2" ,"winter3" ,"winter4", "do_not_use"]
 
-stagioni = ["winter1" ,"winter2" ,"winter3" ,"winter4", "winter5","winter6"]
-
-tempinv = pd.DataFrame( columns = stagioni ) 
+tempinv = pd.DataFrame( columns = winters ) 
 nn = 183*24*4 #183 days, at time intervals of 15 minutes
 nulls = list(["NaN"]*nn) 
 
 for i in range(0,5):
-    data.loc[ (data.year == anni[i])   & (data.dy >= 288) , "winter"] = stagioni[i]  
-    data.loc[ (data.year == anni[i]+1) & (data.dy <= 105) , "winter"] = stagioni[i]
+    data.loc[ (data.year == anni[i])   & (data.dy >= 287) , "winter"] = winters[i]  
+    data.loc[ (data.year == anni[i]+1) & (data.dy <= 106) , "winter"] = winters[i]
 
 
-data = data[ data.winter.isin(["winter1" ,"winter2" ,"winter3" ,"winter4", "winter5"])]
+data = data[ data.winter.isin(["winter1" ,"winter2" ,"winter3" ,"winter4" ])]
 
 col_order = ['date_time_string','winter','dy','month','dd','hh','min','dw','holiday','op_mode','Te','Ir','power']
 data[col_order].to_csv(r'dataset.csv', index = False)
