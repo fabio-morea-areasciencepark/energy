@@ -4,10 +4,9 @@
 # arranged by "heating season" from 15 October to 15 April
 
 import pandas as pd 
-import seaborn as sns 
 import matplotlib.pyplot as plt
-import numpy as np
 
+ 
 data = pd.read_csv(r"raw_data\raw_data_file.csv",
                  sep = ";",
                  skiprows = 2)
@@ -22,25 +21,28 @@ assert set(expected_cols) == set(actual_cols)
 
 data.columns = ['day', 'time', 'energy', 'Te1', 'Te2', 'Te3', 'Ir1', 'Ir2', 'Ir3']
 
-data['day_time'] = pd.to_datetime(data['day'] + data['time'], format='%d-%m-%Y%H:%M:%S')
+data['date_time'] = pd.to_datetime(data['day'] + data['time'], format='%d-%m-%Y%H:%M:%S')
+dt_extract = data['date_time'].astype(str).str[-15:].values
+print(dt_extract)
+data['date_time_string'] = 'YYYY' + dt_extract
 
-data['power'] = data.energy/1000/4 
+data['power'] = (data.energy/1000/4).round(3) #power in kW
 data['Te'] = ((data.Te1 + data.Te2)/2).round(2) #Te2 readings are not reliable
 data['Ir'] = ((data.Ir1 + data.Ir1 + data.Ir3)/3).round(0)
 
 
-data = data [ ['day_time', 'Te', 'Ir', 'power'] ]
+data = data [ ['date_time', 'date_time_string','Te', 'Ir', 'power'] ]
 
 # crea nuove colonne anno, mese, giorno, giorno della settimana e dell'anno
 def add_date_time_columns(df):
-    df['year'] =  df.day_time.dt.year
-    df['month'] = df.day_time.dt.month 
-    df['dd'] =    df.day_time.dt.day 
-    df['dw'] =    df.day_time.dt.day_of_week +1
-    df['dy'] =    df.day_time.dt.day_of_year
-    df['hh'] =    df.day_time.dt.hour
-    df['min'] =   df.day_time.dt.minute
-    df['date_id'] = (df.year.astype(str) + df.month.astype(str).str.zfill(2) + df.dd.astype(str).str.zfill(2)).astype(int)
+    df['year'] =  df.date_time.dt.year
+    df['month'] = df.date_time.dt.month 
+    df['dd'] =    df.date_time.dt.day 
+    df['dw'] =    df.date_time.dt.day_of_week +1
+    df['dy'] =    df.date_time.dt.day_of_year
+    df['hh'] =    df.date_time.dt.hour
+    df['min'] =   df.date_time.dt.minute
+
     return df
 
 def set_holiday(df):
@@ -77,12 +79,25 @@ data = clean(data)
 plt.figure(figsize = (20,2))
 data_to_plot = data[10000:11000]
 
-plt.plot( data_to_plot.day_time,  data_to_plot.Te)
-plt.show()
-plt.plot( data_to_plot.day_time,  data_to_plot.Ir)
-plt.show()
+data['winter'] = "-"
+anni = [2018,2019,2020,2021,2022,2023]
+stagioni = ["inv1819" ,"inv1920" ,"inv2021" ,"inv2122", "inv2223","inv2324"]
+
+stagioni = ["winter1" ,"winter2" ,"winter3" ,"winter4", "winter5","winter6"]
+
+tempinv = pd.DataFrame( columns = stagioni ) 
+nn = 183*24*4 #183 days, at time intervals of 15 minutes
+nulls = list(["NaN"]*nn) 
+
+for i in range(0,5):
+    data.loc[ (data.year == anni[i])   & (data.dy >= 288) , "winter"] = stagioni[i]  
+    data.loc[ (data.year == anni[i]+1) & (data.dy <= 105) , "winter"] = stagioni[i]
 
 
+data = data[ data.winter.isin(["winter1" ,"winter2" ,"winter3" ,"winter4", "winter5"])]
 
+col_order = ['date_time_string','winter','dy','month','dd','hh','min','dw','holiday','op_mode','Te','Ir','power']
+data[col_order].to_csv('dataset.csv', index = False)
 
+print('Done :-D')
 
