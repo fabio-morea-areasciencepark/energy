@@ -23,7 +23,6 @@ data.columns = ['day', 'time', 'energy', 'Te1', 'Te2', 'Te3', 'Ir1', 'Ir2', 'Ir3
 
 data['date_time'] = pd.to_datetime(data['day'] + data['time'], format='%d-%m-%Y%H:%M:%S')
 dt_extract = data['date_time'].astype(str).str[-15:].values
-print(dt_extract)
 data['date_time_string'] = 'YYYY' + dt_extract
 
 data['power'] = (data.energy/1000/4).round(3) #power in kW
@@ -96,7 +95,7 @@ for i in range(0,5):
 data = data[ data.winter.isin(["winter1" ,"winter2" ,"winter3" ,"winter4", "winter5"])]
 
 col_order = ['date_time_string','winter','dy','month','dd','hh','min','dw','holiday','op_mode','Te','Ir','power']
-data[col_order].to_csv('\1_dataset\dataset.csv', index = False)
+data[col_order].to_csv(r'dataset.csv', index = False)
 
 print('Done :-D')
 
