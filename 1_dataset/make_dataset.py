@@ -6,7 +6,6 @@
 import pandas as pd 
 import matplotlib.pyplot as plt
 
- 
 data = pd.read_csv(r"raw_data\raw_data_file.csv",
                  sep = ";",
                  skiprows = 2)
@@ -15,6 +14,7 @@ expected_cols = [   'day', 'time', '(D)Energia Termica Edificio D', 'Temp. Ambie
                     'Temperatura Ambiente', 'Temp. Ambiente.1',
                     'Irraggiamento Imp.15,9 kWp', 'Irraggiamento imp.17,9 kWp',
                     'Irraggiamento']
+
 actual_cols = data.columns
 
 assert set(expected_cols) == set(actual_cols)
@@ -33,7 +33,6 @@ data['Ir'] = ((data.Ir1 + data.Ir1 + data.Ir3)/3).round(0)
 
 data = data [ ['date_time', 'date_time_string','Te', 'Ir', 'power'] ]
 
-# crea nuove colonne anno, mese, giorno, giorno della settimana e dell'anno
 def add_date_time_columns(df):
     df['year'] =  df.date_time.dt.year
     df['month'] = df.date_time.dt.month 
@@ -68,7 +67,7 @@ def set_operating_mode(df):
 
 def clean(df):
     df.loc[ df.power < 0, "power"] = 0
-    df.loc[ df.power < 0, "power"] = 0
+    df.loc[ df.Ir < 0, "Ir"] = 0
     return df
 
 data = add_date_time_columns(data)
@@ -97,7 +96,7 @@ for i in range(0,5):
 data = data[ data.winter.isin(["winter1" ,"winter2" ,"winter3" ,"winter4", "winter5"])]
 
 col_order = ['date_time_string','winter','dy','month','dd','hh','min','dw','holiday','op_mode','Te','Ir','power']
-data[col_order].to_csv('dataset.csv', index = False)
+data[col_order].to_csv('\1_dataset\dataset.csv', index = False)
 
 print('Done :-D')
 
